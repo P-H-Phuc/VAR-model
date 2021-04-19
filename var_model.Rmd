@@ -1,0 +1,259 @@
+---
+title: |
+  <center> The relationship between </center>
+  <center> Consumption expenditure, Net national income and CPI: </center>
+  <center> A VAR approach with an application to Singapore </center>
+  
+author: |
+  Phan Hong Phuc, University of Economics and Law, 04/2021
+
+abstract: "When participating in a market economy, everyone must consider their financial ability to ensure a balance between spending and income. This provides an opportunity to examine the relationship between expenditure and income. In addition, these factors are also influenced by the annual inflation index. To study this, author used Singpore's data about consumption expenditure (US$ trillion), net national income (US$ trillion) and consumer price index (%) from 2000 until 2019, providing 20 observations per series. For first analysis, author use descriptive statistics of the relationship between consumption expenditure, income and CPI. The second, author checks for stationary with ADF test of all series, results show that all variables is stationary at one difference. The thirt, find out optimal lag length and estimate VAR(1) model. The results show that Income and CPI really effect to Expenditure at a lag."
+  
+output: 
+  pdf_document:
+    fig_caption: yes
+header-includes:
+- \usepackage{float}
+- \floatplacement{figure}{h}
+
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE,
+	comment = "",
+	fig.pos = 'h'
+)
+options(digits = 2)
+```
+
+```{r import library data}
+library(tidyverse)
+library(tseries)
+library(psych)
+library(vars)
+library(knitr)
+library(kableExtra)
+library(ggthemes)
+
+df_var = readxl::read_xlsx("df_var.xlsx")
+expenditure = ts(data = df_var$expenditure, start = 2000, class = "ts")
+income = ts(data = df_var$income, start = 2000, class = "ts")
+cpi = ts(data = df_var$cpi, start = 2000, class = "ts")
+```
+
+## I. Descriptive statistics
+
+Table 1 presents the summary results of the data series studied. 
+
+```{r}
+.x = describe(df_var, quant = c(0.25, 0.75)) %>% as.data.frame()
+.x = .x[c("mean", "median", "sd", "min", "max", "Q0.25", "Q0.75", "skew", "kurtosis")]
+names(.x) = c("mean", "median", "sd", "min", "max", "25%", "75%", "skew", "kurtosis")
+kable(.x, caption = "Summarizes the data for the series") %>%
+  kable_classic_2() %>% 
+  kable_styling(latex_options = "hold_position")
+```
+
+```{r fig, fig.height=3, fig.width=10}
+p1 = ggplot(data = df_var) +
+  geom_line(size = 1, aes(x = 2000:2019, y = expenditure, color = "#008080")) +
+  geom_line(size = 1, aes(x = 2000:2019, y = income, color = "#DF0029")) +
+  scale_x_continuous(breaks = seq(2000, 2019, 2)) + 
+  labs(x = "", y = "", title = "Consumption expenditure and Income 2000 - 2019") +
+  scale_color_identity(guide = "legend", labels = c("Expenditure", "Income"),
+                       breaks = c("#008080", "#DF0029"), name = "") + 
+  theme_bw() +
+  theme(legend.position = c(0.2, 0.8), legend.background = element_blank())
+
+p2 = ggplot(data = df_var) +
+  geom_line(color = "#205AA7", size = 1, aes(x = 2000:2019, y = cpi)) +
+  scale_x_continuous(breaks = seq(2000, 2020, 2)) +
+  labs(x = "", y = "", title = "Consumer price index 2000 - 2019") +
+  theme_bw()
+
+gridExtra::grid.arrange(p1, p2, ncol = 2)
+```
+
+Figure 1 left - side provides a time-series for the value of Consumption expenditure, Net national income. It can be observed that there is a disparity between the spending and income of Singaporeans. In recent years, this difference has become more and more pronounced, showing that people are more likely to save money. In addition, comparing the levels and trend with CPI series in right - side, it is evident that expend and income follow CPI. In particular, Net National Income and CPI has a strong relationship, for Consumption Expenditure and CPI, the relationship is weaker.
+
+
+## II. Results Analysis
+ 
+#### 1. Checks for stationary
+
+ - **Consumption Expenditure is stationary at one difference**
+
+```{r}
+adf.test(expenditure)
+```
+
+The test statistics value is -2 and p_value is 0.5, this suggests that can accept the null hypothesis with a significance level if greater 5%, it means that the process has a unit root and in turn that the time series is non-stationary. So, processing take difference time series is necessary to make stationary:
+
+```{r fig1, fig.height=4, fig.width=10}
+expend_diff = diff(expenditure, forecast::ndiffs(expenditure))
+par(mfrow = c(1, 2))
+acf(expend_diff, lwd = 5, main = "ACF for difference of Expenditure series", ylab = "Correlation", xlab = "", col = "#0000CD")
+pacf(expend_diff, lwd = 5, main = "PACF for difference of Expenditure series", ylab = "Correlation", xlab = "", col = "#0000CD")
+```
+
+Based on the graph of ACF and PACF, can see that one difference of expenditure is stationary or does not have time-dependent structure.
+
+ - **Net National Income is stationary at one difference**
+
+```{r}
+adf.test(income)
+```
+
+The test statistics value is -2 and p_value is 0.6, this suggests that can accept the null hypothesis with a significance level if greater 5%, it means that the process has a unit root and in turn that the time series is non-stationary. Similar to Expenditure, can take difference time series to make stationary:
+
+```{r fig2, fig.height=4, fig.width=10}
+income_diff = diff(income, forecast::ndiffs(income))
+par(mfrow = c(1, 2))
+acf(income_diff, lwd = 2, main = "ACF for difference of Income series", ylab = "Correlation", xlab = "", col = "#0000CD")
+pacf(income_diff, lwd = 2, main = "PACF for difference of Income series", ylab = "Correlation", xlab = "", col = "#0000CD")
+```
+
+The results show that the one difference of income is stationary.
+
+ - **Consumer Price Index is stationary at one difference**
+
+```{r}
+adf.test(cpi)
+```
+Similar to above, CPI is non-stationary, so take difference to stationary:
+
+```{r fig3, fig.height=4, fig.width=10}
+CPI_diff = diff(cpi, forecast::ndiffs(cpi))
+par(mfrow = c(1, 2))
+acf(CPI_diff, lwd = 2, main = "ACF for difference of CPI series", ylab = "Correlation", xlab = "", col = "#0000CD")
+pacf(CPI_diff, lwd = 2, main = "PACF for difference of CPI series", ylab = "Correlation", xlab = "", col = "#0000CD")
+```
+
+The results show that the one difference of CPI is stationary.
+
+#### 2. Optimal lag length
+
+```{r}
+VARselect(df_var, lag.max = 2, type = "none")$selection
+```
+
+With results above, optimal lag length is 1, that VAR(1) is applied.
+
+\newpage
+
+#### 3. Estimate VAR(1)
+
+```{r}
+var1 = VAR(df_var, p = 1, type = "none")
+```
+
+```{r include=FALSE, results="hide"}
+sum = summary(var1)
+```
+
+- Consumption expenditure series:
+
+```{r}
+sum$varresult$expenditure$coefficients
+```
+
+- Net National Income series:
+
+```{r}
+sum$varresult$income$coefficients
+```
+
+- Consumer Price Index
+
+```{r}
+sum$varresult$cpi$coefficients
+```
+
+
+
+The author apply VAR(1) model to find out relationship between the series. The results are satisfactory:
+
+  $$
+  \begin {cases}
+  Expenditure_t = 0.322Expenditure_{t-1} + 0.3531Income_{t-1} + 0.147CPI_{t-1}\\
+  Income_t = 0.9588Income_{t-1} + 0.0693Expenditure_{t-1} + 0.1195CPI_{t-1}\\
+  CPI_t = 1.0602CPI_{t-1} + 0.1842Income_{t-1} - 0.3553Expenditure_{t-1}
+  \end{cases}
+  $$
+
+#### 4. Granger causality test
+
+ - Consumption expenditure
+```{r}
+a = causality(var1, cause = "expenditure")
+a$Granger
+```
+
+Conclusion, expenditure has Granger - cause with income and CPI.
+
+ - Net national income
+ 
+```{r}
+a = causality(var1, cause = "income")
+a$Granger
+```
+ 
+ Conclusion, income has Granger - cause with expenditure and CPI.
+ 
+ - Consumer price index
+
+```{r}
+a = causality(var1, cause = "cpi")
+a$Granger
+```
+Conclusion, CPI has Granger - cause with expenditure and income.
+
+#### 5. Predict
+
+ - Fitted model VAR(1) with time series:
+
+
+```{r fig.height=5, fig.width=12}
+fitted = fitted(var1) %>% as.data.frame()
+ggplot() +
+  geom_line(data = df_var, aes(x = 2000:2019, y = expenditure, color = "#008080"), size = 1) +
+  geom_line(data = fitted, aes(x = 2001:2019, y = expenditure, color = "#8B6914"), size = 1) +
+  scale_x_continuous(breaks = seq(2000, 2019, 2)) +
+  labs(title = "Value and predict of Expenditure", x = "", y = "") +
+  scale_color_identity(guide = "legend", labels = c("Expenditure", "Predict"),
+                       breaks = c("#008080", "#8B6914"), name = "") + 
+  theme_bw() +
+  theme(legend.position = c(0.2, 0.8), legend.background = element_blank())
+```
+ 
+```{r fig.height=5, fig.width=12}
+ggplot() +
+  geom_line(data = df_var, aes(x = 2000:2019, y = income, color = "#DF0029"), size = 1) +
+  geom_line(data = fitted, aes(x = 2001:2019, y = income, color = "#8B6914"), size = 1) +
+  scale_x_continuous(breaks = seq(2000, 2019, 2)) +
+  labs(title = "Value and predict of Income", x = "", y = "") +
+  scale_color_identity(guide = "legend", labels = c("Income", "Predict"),
+                       breaks = c("#DF0029", "#8B6914"), name = "") + 
+  theme_bw() +
+  theme(legend.position = c(0.2, 0.8), legend.background = element_blank())
+
+```
+ 
+```{r fig.height=5, fig.width=12}
+ ggplot() +
+  geom_line(data = df_var, aes(x = 2000:2019, y = income, color = "#DF0029"), size = 1) +
+  geom_line(data = fitted, aes(x = 2001:2019, y = income, color = "#8B6914"), size = 1) +
+  scale_x_continuous(breaks = seq(2000, 2019, 2)) +
+  labs(title = "Value and predict of Income", x = "", y = "") +
+  scale_color_identity(guide = "legend", labels = c("Income", "Predict"),
+                       breaks = c("#DF0029", "#8B6914"), name = "") + 
+  theme_bw() +
+  theme(legend.position = c(0.2, 0.8), legend.background = element_blank())
+```
+
+
+
+
