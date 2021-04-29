@@ -1,10 +1,3 @@
-# The relationship between Consumption expenditure, Net national income and CPI: A VAR approach with an application to Singapore
-
-When participating in a market economy, everyone must consider their financial ability to ensure a
-balance between spending and income. This provides an opportunity to examine the relationship between expenditure 
-and income. In addition, these factors are also influenced by the annual inflation index. To study this, author used
-Singpore's data about consumption expenditure (US$ trillion), net national income (US$ trillion) and consumer price
-index (%) from 2000 until 2019, providing 20 observations per series. For first analysis, author use descriptive statistics
-of the relationship between consumption expenditure, income and CPI. The second, author checks for stationary with ADF test
-of all series, results show that all variables is stationary at one difference. The thirt, find out optimal lag length and
-estimate VAR(1) model. The results show that Income and CPI really effect to Expenditure at a lag.
+# Mối quan hệ giữa chi tiêu và thu nhập thông qua mô hình VAR
+==============================================================
+Quản trị tài chính là một yếu tố quan trọng được nhiều thành phần kinh tế quan tâm, vì vậy việc kiểm soát hợp lý giữa chi tiêu và thu nhập là điều cần được làm rõ. Điều này mở ra cơ hội cho việc tìm hiểu và mối quan hệ giữa chi tiêu tiêu dùng và thu nhập. Thêm vào đó, hai yếu tố này chịu sự ảnh hưởng của chỉ số giá tiêu dùng CPI. Để hiểu hơn về điều này, tác giả sử dụng dữ liệu của Singapore về mức chi tiêu tiêu dùng cuối cùng (Tỷ USD), thu nhập ròng (Tỷ USD) và CPI (%) từ năm 2000 - 2019 với 20 quan sát theo năm cho mỗi chuỗi thời gian. Trong phân tích đầu tiên, tác giả sử dụng thống kê mô tả để nhìn tổng quan về các biến cũng như nhận định sơ bộ về mối quan hệ giữa các biến thu thập được. Thứ hai, tác giả sử dụng kiểm định ADF-Dickey Fuller để xác định chuỗi dừng cho vệc xây dựng mô hình, kết quả chỉ ra rằng tất cả các biến đều dừng ở mức sai phân bậc một. Cuối cùng, tác giả xây dựng mô hình VAR, kết quả cho thấy mô hình VAR() là tốt nhất trong việc xác định mối quan hệ giữa chi tiêu, thu nhập và CPI.
