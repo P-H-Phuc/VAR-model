@@ -1,21 +1,17 @@
 ---
 title: |
-  <center> The relationship between </center>
-  <center> Consumption expenditure, Net national income and CPI: </center>
-  <center> A VAR approach with an application to Singapore </center>
-  
-author: |
-  Phan Hong Phuc, University of Economics and Law, 04/2021
-
-abstract: "When participating in a market economy, everyone must consider their financial ability to ensure a balance between spending and income. This provides an opportunity to examine the relationship between expenditure and income. In addition, these factors are also influenced by the annual inflation index. To study this, author used Singpore's data about consumption expenditure (US$ trillion), net national income (US$ trillion) and consumer price index (%) from 2000 until 2019, providing 20 observations per series. For first analysis, author use descriptive statistics of the relationship between consumption expenditure, income and CPI. The second, author checks for stationary with ADF test of all series, results show that all variables is stationary at one difference. The thirt, find out optimal lag length and estimate VAR(1) model. The results show that Income and CPI really effect to Expenditure at a lag."
-  
-output: 
+  <center> Mối quan hệ giữa </center>
+  <center> Chi tiêu tiêu dùng, thu nhập ròng và CPI: </center>
+  <center> Hướng tiếp cận bằng mô hình VAR cho dữ liệu của Singapore </center>
+author: "Phan Hồng Phúc, Trường đại học Kinh tế Luật, 04/2021" 
+abstract: "Quản trị tài chính là một yếu tố quan trọng được nhiều thành phần kinh tế quan tâm, vì vậy việc kiểm soát hợp lý giữa chi tiêu và thu nhập là điều cần được làm rõ. Điều này mở ra cơ hội cho việc tìm hiểu và mối quan hệ giữa chi tiêu tiêu dùng và thu nhập. Thêm vào đó, hai yếu tố này chịu sự ảnh hưởng của chỉ số giá tiêu dùng CPI. Để hiểu hơn về điều này, tác giả sử dụng dữ liệu của Singapore về mức chi tiêu tiêu dùng cuối cùng (Tỷ USD), thu nhập ròng (Tỷ USD) và CPI (%) từ năm 2000 - 2019 với 20 quan sát theo năm cho mỗi chuỗi thời gian. Trong phân tích đầu tiên, tác giả sử dụng thống kê mô tả để nhìn tổng quan về các biến cũng như nhận định sơ bộ về mối quan hệ giữa các biến thu thập được. Thứ hai, tác giả sử dụng kiểm định ADF-Dickey Fuller để xác định chuỗi dừng cho vệc xây dựng mô hình, kết quả chỉ ra rằng tất cả các biến đều dừng ở mức sai phân bậc một. Cuối cùng, tác giả xây dựng mô hình VAR, kết quả cho thấy mô hình VAR() là tốt nhất trong việc xác định mối quan hệ giữa chi tiêu, thu nhập và CPI."
+output:
   pdf_document:
     fig_caption: yes
 header-includes:
 - \usepackage{float}
 - \floatplacement{figure}{h}
-
+- \usepackage{vntex}
 ---
 
 ```{r setup, include=FALSE, echo=FALSE}
@@ -26,7 +22,7 @@ knitr::opts_chunk$set(
 	comment = "",
 	fig.pos = 'h'
 )
-options(digits = 2)
+options(digits = 4)
 ```
 
 ```{r import library data}
@@ -39,16 +35,16 @@ library(kableExtra)
 library(ggthemes)
 
 df_var = readxl::read_xlsx("df_var.xlsx")
-expenditure = ts(data = df_var$expenditure, start = 2000, class = "ts")
+expense = ts(data = df_var$expense, start = 2000, class = "ts")
 income = ts(data = df_var$income, start = 2000, class = "ts")
 cpi = ts(data = df_var$cpi, start = 2000, class = "ts")
 ```
 
-## I. Descriptive statistics
+## I. Thống kê mô tả
 
-Table 1 presents the summary results of the data series studied. 
+Bảng 1 trình bày kết quả tóm tắt thống kê mô tả các biến. 
 
-```{r}
+```{r paged.print=TRUE}
 .x = describe(df_var, quant = c(0.25, 0.75)) %>% as.data.frame()
 .x = .x[c("mean", "median", "sd", "min", "max", "Q0.25", "Q0.75", "skew", "kurtosis")]
 names(.x) = c("mean", "median", "sd", "min", "max", "25%", "75%", "skew", "kurtosis")
@@ -59,11 +55,11 @@ kable(.x, caption = "Summarizes the data for the series") %>%
 
 ```{r fig, fig.height=3, fig.width=10}
 p1 = ggplot(data = df_var) +
-  geom_line(size = 1, aes(x = 2000:2019, y = expenditure, color = "#008080")) +
+  geom_line(size = 1, aes(x = 2000:2019, y = expense, color = "#008080")) +
   geom_line(size = 1, aes(x = 2000:2019, y = income, color = "#DF0029")) +
   scale_x_continuous(breaks = seq(2000, 2019, 2)) + 
-  labs(x = "", y = "", title = "Consumption expenditure and Income 2000 - 2019") +
-  scale_color_identity(guide = "legend", labels = c("Expenditure", "Income"),
+  labs(x = "", y = "", title = "Expense and Income of Singapore 2000 - 2019") +
+  scale_color_identity(guide = "legend", labels = c("Expense", "Income"),
                        breaks = c("#008080", "#DF0029"), name = "") + 
   theme_bw() +
   theme(legend.position = c(0.2, 0.8), legend.background = element_blank())
@@ -77,183 +73,241 @@ p2 = ggplot(data = df_var) +
 gridExtra::grid.arrange(p1, p2, ncol = 2)
 ```
 
-Figure 1 left - side provides a time-series for the value of Consumption expenditure, Net national income. It can be observed that there is a disparity between the spending and income of Singaporeans. In recent years, this difference has become more and more pronounced, showing that people are more likely to save money. In addition, comparing the levels and trend with CPI series in right - side, it is evident that expend and income follow CPI. In particular, Net National Income and CPI has a strong relationship, for Consumption Expenditure and CPI, the relationship is weaker.
+Hình 1 bên trái chỉ ra giá trị của chuỗi chi tiêu và chuỗi thu nhập. Trong 20 năm 2000 - 2019, chi tiêu của Singapore luôn thấp hơn so với mức thu nhập của họ. Quan sát đồ thị ta cũng có thể thấy rằng chi tiêu và tiêu dùng có xu hướng tăng qua các năm. Những năm gần đây, thu nhập có xu hướng tăng mạnh trong khi đó, mức chi tiêu lại tăng chậm hơn. Thêm vào đó, so sánh với xu thế của CPI trên hình 1 bên phải, ta thấy rằng CPI cũng là một chuỗi tăng theo thời gian và nhận thấy có mối quan hệ giữa chi tiêu, thu nhập với CPI. Cụ thể, thu nhập và CPI có mối tương quan mạnh hơn về mức độ và xu thế, trong khi chi tiêu lại có mối tương quan yếu hơn.
 
-
-## II. Results Analysis
+## II. Kết quả phân tích
  
-#### 1. Checks for stationary
-
- - **Consumption Expenditure is stationary at one difference**
+#### 1. Kiểm tra chuỗi dừng
 
 ```{r}
-adf.test(expenditure)
+expend_lm = lm(expense ~ time(expense))
+income_lm = lm(income ~ time(income))
+cpi_lm = lm(cpi ~ time(cpi))
+expense_stationary = urca::ur.df(expense, type = "trend", selectlags = "AIC") %>% summary()
+income_stationay = urca::ur.df(income, type = "trend", selectlags = "AIC") %>% summary()
+cpi_stationay = urca::ur.df(cpi, type = "trend", selectlags = "AIC") %>% summary()
+
 ```
 
-The test statistics value is -2 and p_value is 0.5, this suggests that can accept the null hypothesis with a significance level if greater 5%, it means that the process has a unit root and in turn that the time series is non-stationary. So, processing take difference time series is necessary to make stationary:
+- Sử dụng kiểm định ADF - Augmented-Dickey-Fuller Unit Root Test để kiểm định tính dừng của các chuỗi.
 
-```{r fig1, fig.height=4, fig.width=10}
-expend_diff = diff(expenditure, forecast::ndiffs(expenditure))
-par(mfrow = c(1, 2))
-acf(expend_diff, lwd = 5, main = "ACF for difference of Expenditure series", ylab = "Correlation", xlab = "", col = "#0000CD")
-pacf(expend_diff, lwd = 5, main = "PACF for difference of Expenditure series", ylab = "Correlation", xlab = "", col = "#0000CD")
-```
 
-Based on the graph of ACF and PACF, can see that one difference of expenditure is stationary or does not have time-dependent structure.
+|   Biến   	|   Hằng số   	|    Xu thế   	| test-statistic 	| Critical values 5% 	|     Kết luận    	|
+|:--------:	|:-----------:	|:-----------:	|:--------------:	|:------------------:	|:------------------|
+| Chi tiêu 	| 6.2e-15 *** 	| 5.5e-15 *** 	|      -2.289   	|        -3.60       	| Chuỗi không dừng 	|
+| Thu nhập 	| 3.0e-13 *** 	| 2.7e-13 *** 	|      -2.419    	|        -3.60       	| Chuỗi không dừng 	|
+|    CPI   	| 2.1e-11 *** 	| 1.4e-11 *** 	|      -1.95    	|        -3.60       	| Chuỗi không dừng  |
+Table: Kiểm định ADF cho chuỗi dữ liệu gốc
 
- - **Net National Income is stationary at one difference**
+Bảng 2 trình bày kết quả kiểm định ADF cho chuỗi dữ liệu gốc. Kết quả cho thấy chuỗi gốc tồn tại nghiệm đơn vị hay có tính chất không dừng. Tiến hành lấy sai phân bậc 1 các chuỗi và thực hiện lại kiểm định ADF:
 
 ```{r}
-adf.test(income)
+diff_expense = diff(expense, 1)
+diff_income = diff(income, 1)
+diff_cpi = diff(cpi, 1)
+de_lm = lm(diff_expense ~ time(diff_expense))
+di_lm = lm(diff_income ~ time(diff_income))
+dc_lm = lm(diff_cpi ~ time(diff_cpi))
+de_stationary = urca::ur.df(diff_expense, type = "none", selectlags = "AIC", lags = 0) %>% summary()
+di_stationay = urca::ur.df(diff_income, type = "none", selectlags = "AIC", lags = 0) %>% summary()
+dc_stationay = urca::ur.df(diff_cpi, type = "none", selectlags = "AIC", lags = 0) %>% summary()
 ```
 
-The test statistics value is -2 and p_value is 0.6, this suggests that can accept the null hypothesis with a significance level if greater 5%, it means that the process has a unit root and in turn that the time series is non-stationary. Similar to Expenditure, can take difference time series to make stationary:
+|   Biến   	| Bậc sai phân 	| Hằng số 	| Xu thế 	| test-statistic 	| Critical values  	|  Kết luận  	|
+|:--------:	|:------------:	|:-------:	|:------:	|:--------------:	|:----------------:	|:----------:	|
+| Chi tiêu 	|       1      	|   0.51  	|  0.50  	|      -1.767    	|    -1.6 (10%)    	| Chuỗi dừng 	|
+| Thu nhập 	|       1      	|   0.49  	|  0.48  	|      -2.138    	|    -1.95 (5%)   	| Chuỗi dừng 	|
+|    CPI   	|       1      	|   0.91  	|  0.92  	|      -1.86     	|    -1.6 (10%)    	| Chuỗi dừng 	|
+Table: Kiểm định ADF cho chuỗi sai phân bậc 1
 
-```{r fig2, fig.height=4, fig.width=10}
-income_diff = diff(income, forecast::ndiffs(income))
-par(mfrow = c(1, 2))
-acf(income_diff, lwd = 2, main = "ACF for difference of Income series", ylab = "Correlation", xlab = "", col = "#0000CD")
-pacf(income_diff, lwd = 2, main = "PACF for difference of Income series", ylab = "Correlation", xlab = "", col = "#0000CD")
-```
-
-The results show that the one difference of income is stationary.
-
- - **Consumer Price Index is stationary at one difference**
+Bảng 3 chỉ ra rằng các chuỗi sai phân bậc 1 là chuỗi dừng ở mức ý nghĩa 10%. Điều này cho phép chúng ta khái quát hoá kết quả phân tích cho các giai đoạn khác cũng như kết quả hồi quy không xảy ra các hiện tượng hồi quy giả mạo và mô hình nhận được là đáng tin cậy.
 
 ```{r}
-adf.test(cpi)
-```
-Similar to above, CPI is non-stationary, so take difference to stationary:
-
-```{r fig3, fig.height=4, fig.width=10}
-CPI_diff = diff(cpi, forecast::ndiffs(cpi))
-par(mfrow = c(1, 2))
-acf(CPI_diff, lwd = 2, main = "ACF for difference of CPI series", ylab = "Correlation", xlab = "", col = "#0000CD")
-pacf(CPI_diff, lwd = 2, main = "PACF for difference of CPI series", ylab = "Correlation", xlab = "", col = "#0000CD")
+diff_var = tibble(diff_expense, diff_income, diff_cpi)
 ```
 
-The results show that the one difference of CPI is stationary.
-
-#### 2. Optimal lag length
+#### 2. Độ trễ tối ưu
 
 ```{r}
-VARselect(df_var, lag.max = 2, type = "none")$selection
+lag = VARselect(diff_var, lag.max = 3, type = "const")$criteria
 ```
 
-With results above, optimal lag length is 1, that VAR(1) is applied.
+| Lag   | AIC  	  | HQ    	| SC    	| FPE       	|
+|------	|--------	|--------	|-------- |------------	|
+| 1   	| 8.292* 	| 8.322* 	| 8.871* 	| 4122.963* 	|
+| 2   	| 8.909  	| 8.961  	| 9.923  	| 8947.072  	|
+| 3   	| 9.020  	| 9.094  	| 10.468	| 15813.495 	|
+Table: VAR Lag Order Selection Criteria	
+
+Quan sát các giá trị trong bảng 4, ta thấy rằng ở độ trễ bằng 1 là tối ưu nhất.
 
 \newpage
 
-#### 3. Estimate VAR(1)
+#### 3. Xây dựng mô hình VAR(1)
 
+ - Từ những minh chứng trên ta tiến hành xây dựng mô hình VAR(1), kết quả:
+ 
 ```{r}
-var1 = VAR(df_var, p = 1, type = "none")
+var1 = VAR(diff_var, p = 1, type = "const")
 ```
 
 ```{r include=FALSE, results="hide"}
 sum = summary(var1)
 ```
 
-- Consumption expenditure series:
+- Chuỗi sai phân chi tiêu tiêu dùng:
 
 ```{r}
-sum$varresult$expenditure$coefficients
+sum$varresult$diff_expense$coefficients
 ```
 
-- Net National Income series:
+- Chuỗi sai phân thu nhập:
 
 ```{r}
-sum$varresult$income$coefficients
+sum$varresult$diff_income$coefficients
 ```
 
-- Consumer Price Index
+- Chuỗi sai phân CPI:
 
 ```{r}
-sum$varresult$cpi$coefficients
+sum$varresult$diff_cpi$coefficients
 ```
 
-
-
-The author apply VAR(1) model to find out relationship between the series. The results are satisfactory:
+Ước lượng mô hình VAR(1) để tìm mối quan hệ giữa các chuỗi. Kết quả thu được:
 
   $$
   \begin {cases}
-  Expenditure_t = 0.322Expenditure_{t-1} + 0.3531Income_{t-1} + 0.147CPI_{t-1}\\
-  Income_t = 0.9588Income_{t-1} + 0.0693Expenditure_{t-1} + 0.1195CPI_{t-1}\\
-  CPI_t = 1.0602CPI_{t-1} + 0.1842Income_{t-1} - 0.3553Expenditure_{t-1}
+  DExpense_t = 6.164 - 0.729DExpense_{t-1} + 0.420DIncome_{t-1} + 0.352DCPI_{t-1}\\
+  DIncome_t = 15.024 + 0.468DIncome_{t-1} - 0.743DExpense_{t-1} - 1.546DCPI_{t-1}\\
+  DCPI_t = 0.497 + 0.379DCPI_{t-1} + 0.116DIncome_{t-1} - 0.126DExpense_{t-1}
   \end{cases}
   $$
 
-#### 4. Granger causality test
-
- - Consumption expenditure
-```{r}
-a = causality(var1, cause = "expenditure")
-a$Granger
-```
-
-Conclusion, expenditure has Granger - cause with income and CPI.
-
- - Net national income
- 
-```{r}
-a = causality(var1, cause = "income")
-a$Granger
-```
- 
- Conclusion, income has Granger - cause with expenditure and CPI.
- 
- - Consumer price index
+#### 4. Kiểm tra tính ổn định của mô hình VAR(1)
 
 ```{r}
-a = causality(var1, cause = "cpi")
-a$Granger
+roots(var1)
 ```
-Conclusion, CPI has Granger - cause with expenditure and income.
 
-#### 5. Predict
+Với kết quả trên ta thấy rằng các nghiệm đều nhỏ hơn 1, vì thế mô hình VAR(1) là ổn định.
 
- - Fitted model VAR(1) with time series:
+#### 5. Kết quả kiểm định nhân quả Granger
 
 
-```{r fig.height=5, fig.width=12}
-fitted = fitted(var1) %>% as.data.frame()
-ggplot() +
-  geom_line(data = df_var, aes(x = 2000:2019, y = expenditure, color = "#008080"), size = 1) +
-  geom_line(data = fitted, aes(x = 2001:2019, y = expenditure, color = "#8B6914"), size = 1) +
-  scale_x_continuous(breaks = seq(2000, 2019, 2)) +
-  labs(title = "Value and predict of Expenditure", x = "", y = "") +
-  scale_color_identity(guide = "legend", labels = c("Expenditure", "Predict"),
-                       breaks = c("#008080", "#8B6914"), name = "") + 
-  theme_bw() +
-  theme(legend.position = c(0.2, 0.8), legend.background = element_blank())
+| Biến sai phân 	| Chi tiêu 	| Thu nhập 	|   CPI  	|
+|:-------------:	|:--------:	|:--------:	|:------:	|
+|    Chi tiêu   	|     -    	|  0.6560  	| 0.4231 	|
+|    Thu nhập   	|  0.0033  	|     -    	|  0.078 	|
+|      CPI      	|  0.7238  	|  0.6318  	|    -   	|
+|      All      	|  0.0051  	|  0.3634  	| 0.0013 	|
+Table: Kiểm định Granger. 
+
+
+Kết quả kiểm định Ganger cho thấy, với mức ý nghĩa 5%:
+
+  - Về mặt riêng lẻ từng biến: mức chi tiêu chịu ảnh hưởng của thu thập nhưng không chịu ảnh hưởng bởi biến CPI, thu nhập không chịu ảnh hưởng của chi tiêu và CPI cũng không ảnh hưởng đến biến này, đối với CPI thì thu nhập có tác động còn chi tiêu thì không.
+  - Về mặt tổng thể, sự kết hợp của cả thu nhập và CPI thì có ảnh hưởng đến chi tiêu, sự kết hợp của chi tiêu và thu nhập có tác động đến CPI còn chi tiêu và CPI không ảnh hưởng đến thu nhập.
+
+Như vậy ta có thể thấy hai phương trình có thể dự báo tốt cho chi tiêu và CPI:
+
+  $$
+  \begin {cases}
+  DExpense_t = 6.164 - 0.729DExpense_{t-1} + 0.420DIncome_{t-1} + 0.352DCPI_{t-1}\\
+  DCPI_t = 0.497 + 0.379DCPI_{t-1} + 0.116DIncome_{t-1} - 0.126DExpense_{t-1}
+  \end{cases}
+  $$
+
+#### 6. Hàm phản ứng
+
+##### 6.1. Phản ứng của chi tiêu khi các yếu tố khác chịu một cú sốc
+ 
+   - Khi thu nhập chịu một cú sốc thì trong khoảng 2 năm đầu tiên có tác động tích cực đến chi tiêu, trong 1 năm sau đó tác động tiêu cực và sau đó dần ổn định trở lại.
+
+  - Khi CPI chịu một cú sốc thì trong năm đầu tiên có tác động tích cực đến chi tiêu nhưng tác động tiêu cực vào năm sau đó và càng về sau thì càng ổn định hơn.
+  
+```{r fig.height=3, fig.width=10}
+irf_expense_income = irf(var1, impulse = "diff_income", response = "diff_expense")
+irf_expense_cpi = irf(var1, impulse = "diff_cpi", response = "diff_expense")
+x1 = ggplot() +
+  geom_abline(intercept = 0, slope = 0, size = 1, color = "red") +
+  geom_line(data = as.data.frame(irf_expense_income$irf$diff_income), aes(x = 1:11, y = diff_expense), size = 1) +
+  geom_line(data = as.data.frame(irf_expense_income$Lower$diff_income), aes(x = 1:11, y = diff_expense), linetype = "dashed", color = "red", size = 1) +
+  geom_line(data = as.data.frame(irf_expense_income$Upper$diff_income), aes(x = 1:11, y = diff_expense), linetype = "dashed", color = "red", size = 1) +
+  labs(title = "Expense response to Income shock", x = "", y = "Expense") +
+  theme_classic() + theme(plot.title = element_text(hjust = 0.5))
+
+x2 = ggplot() +
+  geom_abline(intercept = 0, slope = 0, size = 1, color = "red") +
+  geom_line(data = as.data.frame(irf_expense_cpi$irf$diff_cpi), aes(x = 1:11, y = diff_expense), size = 1) +
+  geom_line(data = as.data.frame(irf_expense_cpi$Lower$diff_cpi), aes(x = 1:11, y = diff_expense), linetype = "dashed", color = "red", size = 1) +
+  geom_line(data = as.data.frame(irf_expense_cpi$Upper$diff_cpi), aes(x = 1:11, y = diff_expense), linetype = "dashed", color = "red", size = 1) +
+  labs(title = "Expense response to CPI shock", x = "", y =  "Expense") +
+  theme_classic() + theme(plot.title = element_text(hjust = 0.5))
+gridExtra::grid.arrange(x1, x2 , ncol = 2)
+
+```
+  
+##### 6.2. Phản ứng của thu nhập khi các yếu tố khác chịu một cú sốc
+ 
+ - Khi chi tiêu chịu một cú sốc thì trong khoảng 5 năm đầu tiên có tác động tiêu cực đến thu nhập và sau đó dần ổn định trở lại.
+ 
+ - Khi CPI chịu một cú sốc thì trong 4 năm đầu tiên có tác động tiêu cực đến chi tiêu và dần ổn định hơn vào những năm sau đó.
+  
+```{r fig.height=3, fig.width=10}
+irf_income_expense = irf(var1, impulse = "diff_expense", response = "diff_income")
+irf_income_cpi = irf(var1, impulse = "diff_cpi", response = "diff_income")
+x3 = ggplot() +
+  geom_abline(intercept = 0, slope = 0, size = 1, color = "red") +
+  geom_line(data = as.data.frame(irf_income_expense$irf$diff_expense), aes(x = 1:11, y = diff_income), size = 1) +
+  geom_line(data = as.data.frame(irf_income_expense$Lower$diff_expense), aes(x = 1:11, y = diff_income), linetype = "dashed", color = "red", size = 1) +
+  geom_line(data = as.data.frame(irf_income_expense$Upper$diff_expense), aes(x = 1:11, y = diff_income), linetype = "dashed", color = "red", size = 1) +
+  labs(title = "Income response to Expense shock", x = "", y = "Income") +
+  theme_classic() + theme(plot.title = element_text(hjust = 0.5))
+
+x4 = ggplot() +
+  geom_abline(intercept = 0, slope = 0, size = 1, color = "red") +
+  geom_line(data = as.data.frame(irf_income_cpi$irf$diff_cpi), aes(x = 1:11, y = diff_income), size = 1) +
+  geom_line(data = as.data.frame(irf_income_cpi$Lower$diff_cpi), aes(x = 1:11, y = diff_income), linetype = "dashed", color = "red", size = 1) +
+  geom_line(data = as.data.frame(irf_income_cpi$Upper$diff_cpi), aes(x = 1:11, y = diff_income), linetype = "dashed", color = "red", size = 1) +
+  labs(title = "Income response to CPI shock", x = "", y =  "Income") +
+  theme_classic() + theme(plot.title = element_text(hjust = 0.5))
+gridExtra::grid.arrange(x3, x4 , ncol = 2)
+```
+
+##### 6.3. Phản ứng của CPI khi các yếu tố khác chịu một cú sốc
+
+ - Khi chi tiêu chịu một cú sốc thì trong khoảng 1 năm đầu tiên có tác động tích cực đến CPI, từ năm thứ 2 đến năm thứ 6 có tác động tiêu cực và sau đó dần ổn định trở lại.
+
+ - Khi thu nhập chịu một cú sốc thì trong 2 năm đầu tiên có tác động tích cực đến CPI nhưng tác động tiêu cực vào năm thứ 3 đến năm thứ 6 và sau đó ổn định.
+ 
+```{r fig.height=3, fig.width=10}
+irf_cpi_expense = irf(var1, impulse = "diff_expense", response = "diff_cpi")
+irf_cpi_income = irf(var1, impulse = "diff_income", response = "diff_cpi")
+x3 = ggplot() +
+  geom_abline(intercept = 0, slope = 0, size = 1, color = "red") +
+  geom_line(data = as.data.frame(irf_cpi_expense$irf$diff_expense), aes(x = 1:11, y = diff_cpi), size = 1) +
+  geom_line(data = as.data.frame(irf_cpi_expense$Lower$diff_expense), aes(x = 1:11, y = diff_cpi), linetype = "dashed", color = "red", size = 1) +
+  geom_line(data = as.data.frame(irf_cpi_expense$Upper$diff_expense), aes(x = 1:11, y = diff_cpi), linetype = "dashed", color = "red", size = 1) +
+  labs(title = "CPI response to Expense shock", x = "", y = "CPI") +
+  theme_classic() + theme(plot.title = element_text(hjust = 0.5))
+
+x4 = ggplot() +
+  geom_abline(intercept = 0, slope = 0, size = 1, color = "red") +
+  geom_line(data = as.data.frame(irf_cpi_income$irf$diff_income), aes(x = 1:11, y = diff_cpi), size = 1) +
+  geom_line(data = as.data.frame(irf_cpi_income$Lower$diff_income), aes(x = 1:11, y = diff_cpi), linetype = "dashed", color = "red", size = 1) +
+  geom_line(data = as.data.frame(irf_cpi_income$Upper$diff_income), aes(x = 1:11, y = diff_cpi), linetype = "dashed", color = "red", size = 1) +
+  labs(title = "CPI response to Income shock", x = "", y =  "CPI") +
+  theme_classic() + theme(plot.title = element_text(hjust = 0.5))
+gridExtra::grid.arrange(x3, x4 , ncol = 2)
 ```
  
-```{r fig.height=5, fig.width=12}
-ggplot() +
-  geom_line(data = df_var, aes(x = 2000:2019, y = income, color = "#DF0029"), size = 1) +
-  geom_line(data = fitted, aes(x = 2001:2019, y = income, color = "#8B6914"), size = 1) +
-  scale_x_continuous(breaks = seq(2000, 2019, 2)) +
-  labs(title = "Value and predict of Income", x = "", y = "") +
-  scale_color_identity(guide = "legend", labels = c("Income", "Predict"),
-                       breaks = c("#DF0029", "#8B6914"), name = "") + 
-  theme_bw() +
-  theme(legend.position = c(0.2, 0.8), legend.background = element_blank())
-
-```
+#### 7. Kết quả phân rã phương sai
+  
+ - Trong ngắn hạn, CPI và thu nhập không có sự tác động đến chi tiêu. Từ độ trễ là 2, CPI giải thích được rất ít sự biến thiên của chi tiêu (khoảng 1% - 2%). Thu nhập giải thích được từ 37% - 42% sự biến thiên của chi tiêu.
+ - CPI giải thích được rất ít sự biến thiên của thu nhập khoảng 1.5%, trong khi đó, chi tiêu giải tích được khoảng 56% sự biến động này.
+ - Mức chi tiêu tác động 49% - 52% biến thiên của CPI, và thu nhập giải thích được 5% ở độ trễ đầu tiên và được khoảng 22% - 25% sự biến thiên của CPI.
  
-```{r fig.height=5, fig.width=12}
- ggplot() +
-  geom_line(data = df_var, aes(x = 2000:2019, y = income, color = "#DF0029"), size = 1) +
-  geom_line(data = fitted, aes(x = 2001:2019, y = income, color = "#8B6914"), size = 1) +
-  scale_x_continuous(breaks = seq(2000, 2019, 2)) +
-  labs(title = "Value and predict of Income", x = "", y = "") +
-  scale_color_identity(guide = "legend", labels = c("Income", "Predict"),
-                       breaks = c("#DF0029", "#8B6914"), name = "") + 
-  theme_bw() +
-  theme(legend.position = c(0.2, 0.8), legend.background = element_blank())
+```{r fig.height=9, fig.width=18}
+vd = fevd(var1)
+plot(vd)
 ```
-
-
-
-
